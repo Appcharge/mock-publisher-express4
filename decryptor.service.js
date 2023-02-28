@@ -7,7 +7,6 @@ class DecryptorService {
     }
 
     decrypt(encryptedText) {
-        
         const decipher = crypto.createDecipheriv(
             "aes-256-cbc",
             this.key,
@@ -17,6 +16,10 @@ class DecryptorService {
         let decrypted = decipher.update(encryptedText, "hex", "utf8");
         decrypted += decipher.final("utf8");
         return decrypted;
+    }
+
+    static init(iv, key) {
+        return new DecryptorService(iv, key)
     }
 
 }
