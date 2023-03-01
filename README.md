@@ -6,7 +6,4 @@ IV='[IV GOES HERE]' KEY='[KEY GOES HERE]' npm start
 docker build -t appcharge/webhook-express .
 
 ### How to run the container locally
-docker run --rm -it -e KEY='[KEY GOES HERE]' -e IV='[IV GOES HERE]' -p8080:8080 appcharge/webhook-express
-
-### How to test the container locally
-curl --location 'http://localhost:8080/updateBalance' --header 'Content-Type: text/plain' --data '[encrypted data]'
+docker run --rm -it -e KEY='[KEY GOES HERE]' -e IV='[IV GOES HERE]' -e APP_SECRET='[FACEBOOK APP SECRET]' -p8080:8080 appcharge/webhook-express

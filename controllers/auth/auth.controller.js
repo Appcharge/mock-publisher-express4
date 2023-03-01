@@ -31,14 +31,23 @@ router.post("/", async (req, res) => {
         return;
     }
 
-    // If the result is valid, generate and return a PublisherResponse object
+    // If the result is valid
     if (result.isValid) {
+
+        /******************************
+        TODO
+        In this section the user is authenticated and verified against the SSO provider.
+        `loginResponse` contains an example response for user authentication, you will need to implement this part with data from your backend.
+        You will have the user id returned by the SSO verification under `result.user_id`, you should use this id to find the user in your systems.
+        AuthResponse values can be found in the integration documentation.
+        /******************************/
+        console.log("login successful")
         const loginResponse = new AuthResponse(
             "valid",
             "<PLAYER PROFILE IMAGE>",
-            result.user_id,
+            "<PLAYER ID>",
             "<PLAYER NAME>",
-            ["Segment1", "Segment2"],
+            ["<Segment1>", "<Segment2>"],
             [
                 {
                     currency: "diamonds",
@@ -46,8 +55,8 @@ router.post("/", async (req, res) => {
                 },
                 {
                     currency: "stones",
-                    balance: 6,
-                },
+                    balance: 6
+                }
             ]
         );
 
