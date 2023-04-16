@@ -5,9 +5,9 @@ require("dotenv").config();
 if (
   process.env.IV == undefined ||
   process.env.KEY == undefined ||
-  process.env.APP_SECRET == undefined
+  process.env.FACEBOOK_APP_SECRET == undefined
 ) {
-  console.error("Missing IV/KEY/APP_SECRET environment variable");
+  console.error("Missing IV/KEY/FACEBOOK_APP_SECRET environment variable");
   return;
 }
 
@@ -44,5 +44,6 @@ app.use("/auth", authController)
 app.use("/updateBalance", decryptMiddleware)
 app.use("/updateBalance", playerController)
 
+const PORT = process.env.PORT || 8080;
 // Start the server
-app.listen(8080, () => console.log(`Webhook server started!`));
+app.listen(PORT, () => console.log(`Webhook server started on port ${PORT}!`));

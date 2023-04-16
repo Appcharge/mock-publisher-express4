@@ -9,20 +9,20 @@ router.post("/", async (req, res) => {
     res.setHeader("Content-Type", "application/json");
 
     // Decrypt the request body using AESDecryptor with the provided key and iv
-    const authType = req.body.authType;
+    const authMethod = req.body.authMethod;
 
     // authentication implementations
     let result = null;
-    switch (authType) {
+    switch (authMethod) {
         case "facebook":
             const appId = req.body.appId;
             const token = req.body.token;
 
             // Verify the app_id and token with confirm_fb_login and get the result
-            result = await facebookLogin(process.env.APP_SECRET, appId, token);
+            result = await facebookLogin(process.env.FACEBOOK_APP_SECRET, appId, token);
             break;
         default:
-            res.status(400).send(`bad auth type: ${authType}`);
+            res.status(400).send(`bad auth type: ${authMethod}`);
             return;
     }
 
