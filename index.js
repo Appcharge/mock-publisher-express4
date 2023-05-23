@@ -17,6 +17,7 @@ var bodyParser = require("body-parser");
 const authController = require('./controllers/auth/auth.controller')
 const playerController = require('./controllers/player/player.controller')
 const decryptor = require("./decryptor.service").init(process.env.IV, process.env.KEY);
+const signer = require('./signer.service').init(process.env.KEY);
 
 // Create Express app instance
 const app = express();
@@ -30,18 +31,33 @@ app.use((error, req, res, next) => {
   res.status(400).send("Bad Request");
 });
 
+app.use(express.json());
+
 // Middleware to decrypt request body
-function decryptMiddleware(req, res, next){
-  var decrypted = decryptor.decrypt(req.body);
-  req.body = JSON.parse(decrypted)
-  next()
+function authMiddleware(req, res, next) {
+  if (req.headers.hasOwnProperty('authorization')) {
+    var sign = signer.signPayload(JSON.stringify(req.body));
+    if (`Signature ${sign}` !== req.headers['authorization']) {
+      return res.status(400).json({ error: 'Invalid authorization header' });
+    }
+  } else {
+    try {
+      var decrypted = decryptor.decrypt(req.body);
+      req.body = JSON.parse(decrypted);
+    } catch (error) {
+      return res.status(400).json({ error: 'Decryption failed' });
+    }
+  }
+
+  next();
 }
 
+
 // Set up routes
-app.use("/auth", decryptMiddleware)
+app.use("/auth", authMiddleware)
 app.use("/auth", authController)
 
-app.use("/updateBalance", decryptMiddleware)
+app.use("/updateBalance", authMiddleware)
 app.use("/updateBalance", playerController)
 
 const PORT = process.env.PORT || 8080;
