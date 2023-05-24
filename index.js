@@ -18,6 +18,7 @@ const authController = require('./controllers/auth/auth.controller')
 const playerController = require('./controllers/player/player.controller')
 const decryptor = require("./decryptor.service").init(process.env.IV, process.env.KEY);
 const signer = require('./signer.service').init(process.env.KEY);
+const parseSignature = require('./utils');
 
 // Create Express app instance
 const app = express();
@@ -35,9 +36,11 @@ app.use(express.json());
 
 // Middleware to decrypt request body
 function authMiddleware(req, res, next) {
-  if (req.headers.hasOwnProperty('authorization')) {
-    var sign = signer.signPayload(JSON.stringify(req.body));
-    if (`Signature ${sign}` !== req.headers['authorization']) {
+  if (req.headers.hasOwnProperty('signature')) {
+    var expectedSignature = parseSignature(req.headers['signature']);
+    var signedPayload = `${expectedSignature.t}.${JSON.stringify(req.body)}`
+    var sign = signer.signPayload(signedPayload);
+    if (sign !== expectedSignature.v1) {
       return res.status(400).json({ error: 'Invalid authorization header' });
     }
   } else {
