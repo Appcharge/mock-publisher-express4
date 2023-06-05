@@ -38,8 +38,8 @@ app.use(express.json());
 function authMiddleware(req, res, next) {
   if (req.headers.hasOwnProperty('signature')) {
     var expectedSignature = parseSignature(req.headers['signature']);
-    var signedPayload = `${expectedSignature.t}.${JSON.stringify(req.body)}`
-    var sign = signer.signPayload(signedPayload);
+    var payloadToSign = `${expectedSignature.t}.${JSON.stringify(req.body)}`
+    var sign = signer.signPayload(payloadToSign);
     if (sign !== expectedSignature.v1) {
       return res.status(400).json({ error: 'Invalid authorization header' });
     }
