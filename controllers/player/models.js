@@ -13,11 +13,11 @@ class UpdateBalanceRequest {
     purchaseDateAndTimeUtc
     gameId
     playerId
-    authType
     bundleName
     bundleId
     sku
     priceInCents
+    priceInDollars
     currency
     action
     actionStatus
