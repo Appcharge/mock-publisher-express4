@@ -8,6 +8,15 @@ class ProductRequest {
     }
 }
 
+class Price {
+    subTotal
+    tax
+
+    static fromJson(data) {
+        return Object.assign(new ProductRequest(), data);
+    }
+}
+
 class UpdateBalanceRequest {
     appChargePaymentId
     purchaseDateAndTimeUtc
@@ -19,6 +28,7 @@ class UpdateBalanceRequest {
     priceInCents
     priceInDollars
     currency
+    price
     action
     actionStatus
     products
@@ -26,10 +36,13 @@ class UpdateBalanceRequest {
 
     static fromJson(data) {
         let products = data.products
+        let price = data.price
         delete data.products
+        delete data.price
 
         let instance = Object.assign(new UpdateBalanceRequest(), data);
         instance.products = products.map(product => ProductRequest.fromJson(product));
+        instance.price = Price.fromJson(Price.fromJson(price));
         
         return instance
     }
