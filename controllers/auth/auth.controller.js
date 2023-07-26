@@ -1,72 +1,77 @@
 const express = require("express");
 const router = express.Router();
 
-let facebookLogin = require("./logins/facebook");
-const AuthResponse = require("./models").AuthResponse;
+const secretsService = {
+  getFacebookSecret: () => process.env.FACEBOOK_APP_SECRET,
+  getAppleSecretApi: () => process.env.APPLE_SECRET_API,
+};
+
+const facebookLogin = require("./logins/facebook");
+const googleLogin = require("./logins/google");
+const appleLogin = require("./logins/apple");
+const { LoginResponse } = require("./models");
+
+const createAuthResponse = (authResult) => {
+  return {
+    status: "valid",
+    imageUrl:
+      "https://scontent.ftlv15-1.fna.fbcdn.net/v/t1.6435-9/39453230_281250465987441_6821580385961377792_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=EhNdfDjnT0MAX9Urj2h&_nc_ht=scontent.ftlv15-1.fna&oh=00_AfDz7cKzDCQC17o4L0i1ujpjilH11pTdfVyWPXMxzuOGxQ&oe=64C269BF",
+    publisherPlayerId: authResult.userId,
+    playerName: "Joe Dow",
+    segments: ["seg1", "seg2"],
+    balances: [{ currency: "diamonds", balance: 15 }],
+  };
+};
 
 router.post("/", async (req, res) => {
-    // Set the response type to JSON
-    res.setHeader("Content-Type", "application/json");
+  const authRequest = req.body;
 
-    // Decrypt the request body using AESDecryptor with the provided key and iv
-    const authMethod = req.body.authMethod;
+  try {
+    let authResult = new LoginResponse(false, null);
 
-    // authentication implementations
-    let result = null;
+    const authMethod = authRequest ? authRequest.authMethod : null;
     switch (authMethod) {
-        case "facebook":
-            const appId = req.body.appId;
-            const token = req.body.token;
-
-            // Verify the app_id and token with confirm_fb_login and get the result
-            result = await facebookLogin(process.env.FACEBOOK_APP_SECRET, appId, token);
-            break;
-        default:
-            res.status(400).send(`bad auth type: ${authMethod}`);
-            return;
-    }
-
-    if (result == null) {
-        res.status(400).send("empty login result");
-        return;
-    }
-
-    // If the result is valid
-    if (result.isValid) {
-
-        /******************************
-        TODO
-        In this section the user is authenticated and verified against the SSO provider.
-        `loginResponse` contains an example response for user authentication, you will need to implement this part with data from your backend.
-        You will have the user id returned by the SSO verification under `result.user_id`, you should use this id to find the user in your systems.
-        AuthResponse values can be found in the integration documentation.
-        /******************************/
-        console.log("login successful")
-        const loginResponse = new AuthResponse(
-            "valid",
-            "<PLAYER PROFILE IMAGE>",
-            "<PLAYER ID>",
-            "<PLAYER NAME>",
-            ["<Segment1>", "<Segment2>"],
-            [
-                {
-                    currency: "diamonds",
-                    balance: 456,
-                },
-                {
-                    currency: "stones",
-                    balance: 6
-                }
-            ]
+      case "facebook":
+        authResult = await facebookLogin(
+          authRequest.appId,
+          authRequest.token,
+          secretsService.getFacebookSecret()
         );
-
-        const jsonResponse = JSON.stringify(loginResponse);
-
-        res.send(jsonResponse);
-    } else {
-        // If the result is invalid, halt with a 400 error
-        res.status(400).send("login failed");
+        break;
+      case "google":
+        authResult = await googleLogin(
+          authRequest.appId,
+          authRequest.token
+        );
+        break;
+      case "apple":
+        authResult = await appleLogin(
+          authRequest.appId,
+          authRequest.token,
+          secretsService.getAppleSecretApi()
+        );
+        break;
+      case "userToken":
+      case "userPassword":
+        authResult = new LoginResponse(true, authRequest.token);
+        break;
+      default:
+        console.error("Unknown authentication method", authMethod);
+        return res.status(400).json(null);
     }
+
+    if (authResult.isValid) {
+      console.log("Successful login");
+      const authResponse = createAuthResponse(authResult);
+      return res.json(authResponse);
+    } else {
+      console.log("Failed login");
+      return res.status(400).json(null);
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json(null);
+  }
 });
 
 module.exports = router;

@@ -3,11 +3,11 @@ require("dotenv").config();
 
 // Check if required environment variables are defined
 if (
-  process.env.IV == undefined ||
   process.env.KEY == undefined ||
-  process.env.FACEBOOK_APP_SECRET == undefined
+  process.env.FACEBOOK_APP_SECRET == undefined ||
+  process.env.APPLE_SECRET_API == undefined
 ) {
-  console.error("Missing IV/KEY/FACEBOOK_APP_SECRET environment variable");
+  console.error("Missing KEY/FACEBOOK_APP_SECRET/APPLE_SECRET_API environment variable");
   return;
 }
 
@@ -36,22 +36,12 @@ app.use(express.json());
 
 // Middleware to decrypt request body
 function authMiddleware(req, res, next) {
-  if (req.headers.hasOwnProperty('signature')) {
-    var expectedSignature = parseSignature(req.headers['signature']);
-    var payloadToSign = `${expectedSignature.t}.${JSON.stringify(req.body)}`
-    var sign = signer.signPayload(payloadToSign);
-    if (sign !== expectedSignature.v1) {
-      return res.status(400).json({ error: 'Invalid authorization header' });
-    }
-  } else {
-    try {
-      var decrypted = decryptor.decrypt(req.body);
-      req.body = JSON.parse(decrypted);
-    } catch (error) {
-      return res.status(400).json({ error: 'Decryption failed' });
-    }
+  var expectedSignature = parseSignature(req.headers['signature']);
+  var payloadToSign = `${expectedSignature.t}.${JSON.stringify(req.body)}`
+  var sign = signer.signPayload(payloadToSign);
+  if (sign !== expectedSignature.v1) {
+    return res.status(400).json({ error: 'Invalid authorization header' });
   }
-
   next();
 }
 
