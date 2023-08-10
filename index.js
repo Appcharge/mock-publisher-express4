@@ -40,7 +40,7 @@ function authMiddleware(req, res, next) {
   var payloadToSign = `${expectedSignature.t}.${JSON.stringify(req.body)}`
   var sign = signer.signPayload(payloadToSign);
   if (sign !== expectedSignature.v1) {
-    return res.status(400).json({ error: 'Invalid authorization header' });
+    return res.status(401).json({ error: 'Invalid authorization header' });
   }
   next();
 }

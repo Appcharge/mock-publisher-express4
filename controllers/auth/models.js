@@ -1,5 +1,4 @@
 class AuthResponse {
-
     status;
     playerProfileImage;
     publisherPlayerId;
@@ -17,6 +16,21 @@ class AuthResponse {
       } 
 }
 
+class AuthenticationRequest {
+    authMethod
+    token
+    date
+    appId
+    userName
+    password
+
+    static fromJson(data) {
+        let instance = Object.assign(new AuthenticationRequest(), data);
+        instance.date = new Date(data.date);  // Converting the date string into a JavaScript Date object
+        return instance;
+    }
+}
+
 class LoginResponse {
     isValid;
     userId;
@@ -30,3 +44,4 @@ class LoginResponse {
 
 module.exports.AuthResponse = AuthResponse
 module.exports.LoginResponse = LoginResponse
+module.exports.AuthenticationRequest = AuthenticationRequest

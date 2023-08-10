@@ -2,8 +2,14 @@ const express = require("express");
 const router = express.Router();
 
 const UpdateBalanceRequest = require('./models').UpdateBalanceRequest
+const UpdateBalanceRequestSchema = require('./models.schema');
 
 router.post("/", (req, res) => {
+    const { error } = UpdateBalanceRequestSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
     const updateBalaceRequest = UpdateBalanceRequest.fromJson(req.body)
     console.log("purchase request: " + JSON.stringify(updateBalaceRequest))
     /******************************
