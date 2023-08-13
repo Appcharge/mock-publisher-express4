@@ -10,6 +10,8 @@ const facebookLogin = require("./logins/facebook");
 const googleLogin = require("./logins/google");
 const appleLogin = require("./logins/apple");
 const { LoginResponse } = require("./models");
+const { AuthenticationRequest } = require("./models");
+const AuthenticationRequestSchema = require("./models.schema");
 
 const createAuthResponse = (authResult) => {
   return {
@@ -24,7 +26,12 @@ const createAuthResponse = (authResult) => {
 };
 
 router.post("/", async (req, res) => {
-  const authRequest = req.body;
+  const { error } = AuthenticationRequestSchema.validate(req.body);
+  if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+  }
+
+  const authRequest = AuthenticationRequest.fromJson(req.body);
 
   try {
     let authResult = new LoginResponse(false, null);
@@ -52,6 +59,8 @@ router.post("/", async (req, res) => {
         );
         break;
       case "userToken":
+        authResult = new LoginResponse(true, authRequest.token);
+        break;
       case "userPassword":
         authResult = new LoginResponse(true, authRequest.token);
         break;
