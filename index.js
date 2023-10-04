@@ -16,9 +16,10 @@ var express = require("express");
 var bodyParser = require("body-parser");
 const authController = require('./controllers/auth/auth.controller')
 const playerController = require('./controllers/player/player.controller')
-const decryptor = require("./decryptor.service").init(process.env.IV, process.env.KEY);
-const signer = require('./signer.service').init(process.env.KEY);
-const parseSignature = require('./utils');
+const ordersController = require('./controllers/order/order.controller')
+const analyticsController = require('./controllers/analytics/analytics.controller')
+const offerController = require('./controllers/offer/offer.controller')
+const authMiddleware = require("./middleware/auth.middleware");
 
 // Create Express app instance
 const app = express();
@@ -34,24 +35,22 @@ app.use((error, req, res, next) => {
 
 app.use(express.json());
 
-// Middleware to decrypt request body
-function authMiddleware(req, res, next) {
-  var expectedSignature = parseSignature(req.headers['signature']);
-  var payloadToSign = `${expectedSignature.t}.${JSON.stringify(req.body)}`
-  var sign = signer.signPayload(payloadToSign);
-  if (sign !== expectedSignature.v1) {
-    return res.status(401).json({ error: 'Invalid authorization header' });
-  }
-  next();
-}
-
 
 // Set up routes
-app.use("/auth", authMiddleware)
-app.use("/auth", authController)
+app.use("/mocker/auth", authMiddleware)
+app.use("/mocker/auth", authController)
 
-app.use("/updateBalance", authMiddleware)
-app.use("/updateBalance", playerController)
+app.use("/mocker", authMiddleware)
+app.use("/mocker", playerController)
+
+app.use("/mocker/orders", authMiddleware)
+app.use("/mocker/orders", ordersController)
+
+app.use("/mocker/analytics", authMiddleware)
+app.use("/mocker/analytics", analyticsController)
+
+app.use("/mocker/analytics", authMiddleware)
+app.use("/mocker/offer", offerController)
 
 const PORT = process.env.PORT || 8080;
 // Start the server
