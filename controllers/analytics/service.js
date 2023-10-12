@@ -25,3 +25,4 @@ class AnalyticsService {
 }
 
 module.exports = AnalyticsService
+

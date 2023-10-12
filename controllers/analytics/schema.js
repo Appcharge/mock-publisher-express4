@@ -9,3 +9,4 @@ const AnalyticsRequestSchema = Joi.object({
 )
 
 module.exports = AnalyticsRequestSchema;
+

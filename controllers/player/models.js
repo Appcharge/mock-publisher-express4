@@ -37,3 +37,4 @@ class UpdateBalanceRequest {
 }
 
 module.exports.UpdateBalanceRequest = UpdateBalanceRequest
+

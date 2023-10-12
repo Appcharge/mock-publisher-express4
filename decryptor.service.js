@@ -26,3 +26,4 @@ class DecryptorService {
   
  
 module.exports = DecryptorService
+

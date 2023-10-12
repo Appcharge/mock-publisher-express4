@@ -54,3 +54,4 @@ function extractUserIdFromIdToken(idToken) {
 }
 
 module.exports = appleLogin;
+

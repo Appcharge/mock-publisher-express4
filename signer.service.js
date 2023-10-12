@@ -28,3 +28,4 @@ class SignatureHashingService {
 }
 
 module.exports = SignatureHashingService
+

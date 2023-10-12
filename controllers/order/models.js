@@ -11,3 +11,4 @@ class GetOrdersRequest {
 }
 
 module.exports.GetOrdersRequest = GetOrdersRequest
+

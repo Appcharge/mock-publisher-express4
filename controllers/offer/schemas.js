@@ -47,3 +47,4 @@ const CreateOfferSchema = Joi.object({
 });
 
 module.exports = CreateOfferSchema;
+

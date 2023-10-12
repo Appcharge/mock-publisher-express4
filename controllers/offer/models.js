@@ -23,3 +23,4 @@ class CreateOfferRequest {
 }
 
 module.exports.CreateOfferRequest = CreateOfferRequest;
+

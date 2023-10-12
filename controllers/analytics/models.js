@@ -10,3 +10,4 @@ class AnalyticsRequest {
 }
 
 module.exports.AnalyticsRequest = AnalyticsRequest;
+
