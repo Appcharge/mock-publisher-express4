@@ -25,3 +25,4 @@ const UpdateBalanceRequestSchema = Joi.object({
 });
 
 module.exports = UpdateBalanceRequestSchema;
+

@@ -10,3 +10,4 @@ const AuthenticationRequestSchema = Joi.object({
 });
 
 module.exports = AuthenticationRequestSchema;
+

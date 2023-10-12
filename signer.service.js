@@ -12,6 +12,15 @@ class SignatureHashingService {
         return hmac.digest('hex');
     }
 
+    createSignature(body) {
+        const time = new Date().getTime();
+        const signedPayload = `${time}.${JSON.stringify(body)}`;
+        const signature = crypto.createHmac('sha256', this.key)
+            .update(signedPayload)
+            .digest('hex');
+        return `t=${time},v1=${signature}`;
+    }
+
     static init(key) {
         return new SignatureHashingService(key)
     }
@@ -19,3 +28,4 @@ class SignatureHashingService {
 }
 
 module.exports = SignatureHashingService
+

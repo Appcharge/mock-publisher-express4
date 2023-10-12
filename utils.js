@@ -20,3 +20,4 @@ function parseSignature(signatureString) {
 }
 
 module.exports = parseSignature;
+

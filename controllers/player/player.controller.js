@@ -2,27 +2,23 @@ const express = require("express");
 const router = express.Router();
 
 const UpdateBalanceRequest = require('./models').UpdateBalanceRequest
-const UpdateBalanceRequestSchema = require('./models.schema');
+const playerService = require("./service").init(process.env.AWARD_PUBLISHER_URL);
+const signer = require('../../signer.service').init(process.env.KEY);
+const secretsService = {
+    key: () => process.env.KEY
+};
 
-router.post("/", (req, res) => {
-    const { error } = UpdateBalanceRequestSchema.validate(req.body);
-    if (error) {
-        return res.status(400).json({ error: error.details[0].message });
-    }
-
-    const updateBalaceRequest = UpdateBalanceRequest.fromJson(req.body)
-    console.log("purchase request: " + JSON.stringify(updateBalaceRequest))
-    /******************************
-    TODO
-    This controller is triggered when a player has purchased a bundle in the store.
-    You need to implement the code that updates the player's balance according to the integration guideline.
-    /******************************/
-    
-    return res.json({
-        // TODO change the <PURCHASE-ID> with a real purchase ID.
-        // See integration guideline
-        publisherPurchaseId: "<PURCHASE-ID>",
-    });
+router.get("/playerInfoSync", async (req, res) => {
+    const playerInfoSyncData = await playerService.infoSync()
+    return res.json(playerInfoSyncData);
+});
+router.post("/playerUpdateBalance", async (req, res) => {
+    const updateBalanceRequest = UpdateBalanceRequest.fromJson(req.body)
+    const signature = signer.createSignature(updateBalanceRequest, secretsService.key())
+    const playerUpdateBalanceData = await playerService.updateBalance(signature, updateBalanceRequest)
+    return res.json(playerUpdateBalanceData);
 });
 
+
 module.exports = router;
+
